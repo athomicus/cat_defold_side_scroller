@@ -1,0 +1,22 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("set_deaths") then
+		gui.set_text(self.deaths_node, tostring(message.deaths_count))
+	end
+end
+
+function init(self)
+	--zczytaj adres node w gui
+	self.deaths_node = gui.get_node("deaths")
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+
+
+
+
+

@@ -1,0 +1,82 @@
+local FOLLOW_RATE = 8
+local CAMERA_OFFSET_Y = 100
+
+local TILEMAP_URL = "/level#cavern"
+local TILE_SIZE = 32
+
+function init(self)
+	self.half_view_width = 480
+
+	-- Odczytaj granice tilemapy
+	local tile_x, tile_y, tile_w, tile_h = tilemap.get_bounds(TILEMAP_URL)
+
+	-- Indeksy kafli są 1-indexed, więc lewa krawędź mapy to (tile_x - 1) * TILE_SIZE
+	local level_min_x = (tile_x - 1) * TILE_SIZE
+	local level_max_x = (tile_x - 1 + tile_w) * TILE_SIZE
+
+	self.level_min_x = level_min_x
+	self.level_max_x = level_max_x
+end
+
+function late_update(self, dt)
+	local player = go.get_position("/player")
+	local position = go.get_position()
+
+	local projection = camera.get_projection("#camera")
+	self.half_view_width = 1 / projection.m00
+
+	local min_x = self.level_min_x + self.half_view_width
+	local max_x = self.level_max_x - self.half_view_width
+
+	-- Gdy mapa jest węższa niż widok kamery, zostaw kamerę na środku mapy
+	if max_x < min_x then
+		local center_x = (self.level_min_x + self.level_max_x) / 2
+		position.x = center_x
+	else
+		local target_x = vmath.clamp(player.x, min_x, max_x)
+
+		local dt_clamped = math.min(dt, 1 / 30)
+		local blend = 1 - math.exp(-FOLLOW_RATE * dt_clamped)
+
+		position.x = position.x + (target_x - position.x) * blend
+	end
+
+	position.y = CAMERA_OFFSET_Y
+	go.set_position(position)
+end
+
+
+-- local FOLLOW_RATE = 8
+-- local CAMERA_OFFSET_Y = 100
+-- 
+-- function init(self)
+-- 	-- domyślne granice, zanim level je wyśle
+-- 	self.level_min_x = 0
+-- 	self.level_max_x = 3200
+-- 
+-- 	self.half_view_width = 480
+-- end
+-- 
+-- function late_update(self, dt)
+-- 	local player = go.get_position("/player")
+-- 	local position = go.get_position()
+-- 
+-- 	-- pobierz aktualną projekcję kamery
+-- 	local projection = camera.get_projection("#camera")
+-- 
+-- 	-- dla projekcji ortograficznej:
+-- 	-- 1 / m00 = połowa szerokości widoku w jednostkach świata
+-- 	self.half_view_width = 1 / projection.m00
+-- 
+-- 	local min_x = self.level_min_x + self.half_view_width
+-- 	local max_x = self.level_max_x - self.half_view_width
+-- 
+-- 	local target_x = vmath.clamp(player.x, min_x, max_x)
+-- 
+-- 	local dt_clamped = math.min(dt, 1 / 30)
+-- 	local blend = 1 - math.exp(-FOLLOW_RATE * dt_clamped)
+-- 
+-- 	position.x = position.x + (target_x - position.x) * blend
+-- 	position.y = CAMERA_OFFSET_Y
+-- 	go.set_position(position)
+-- end

@@ -1,0 +1,7 @@
+images {
+  image: "/assets/gear64.png"
+}
+images {
+  image: "/assets/splat.png"
+}
+extrude_borders: 2

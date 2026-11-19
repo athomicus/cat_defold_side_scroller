@@ -1,0 +1,10 @@
+images {
+  image: "/energy/beam.png"
+}
+images {
+  image: "/energy/glow.png"
+}
+images {
+  image: "/energy/spark.png"
+}
+extrude_borders: 2

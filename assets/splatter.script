@@ -1,0 +1,77 @@
+local GRAVITY = vmath.vector3(0, -900, 0)       -- krople opadają jak kot
+local GROUPS = { hash("paintable") }             -- szukamy tylko zębatek
+local BLUE = vmath.vector4(0.8, 0.0, 0.0, 1.0)   -- kolor plam
+local MAX_ON_GEAR = 25                           -- limit plam na jednej zębatce
+
+function init(self)
+	self.drops = {}    -- lista lecących kropli
+	self.stuck = {}    -- plamy przyklejone do każdej zębatki
+end
+
+-- tworzy wiele kropli lecących we wszystkie strony z miejsca śmierci
+local function burst(self, pos, count)
+	for i = 1, count do
+		local angle = math.random() * math.pi * 2 --2*pi -> 360 stopni * losowy kat
+		local speed = 150 + math.random() * 300
+		table.insert(self.drops, {
+			p = vmath.vector3(pos.x, pos.y, 0), --startuje
+			v = vmath.vector3(math.cos(angle) * speed, math.sin(angle) * speed, 0),
+			life = 2.0,
+		})	
+	end
+end
+
+
+--one drop:
+--{
+--	p = vmath.vector3(412, 96, 0),     -- startuje tam, gdzie zginął kot
+--	v = vmath.vector3(212, 212, 0),    -- leci w prawo i w górę, 300 px/s
+--	life = 2.0,                        -- zniknie po 2 sekundach
+--}
+
+
+-- tworzy niebieską plamę i przykleja ją do zębatki
+local function make_splat(self, hit)
+	local pos = vmath.vector3(hit.position.x, hit.position.y, 0.1)
+	local rot = vmath.quat_rotation_z(math.random() * math.pi * 2)
+	local scale = 0.15 + math.random() * 0.2
+
+	local id = factory.create("#splat_factory", pos, rot, nil, scale)
+	go.set(msg.url(nil, id, "sprite"), "tint", BLUE)
+	go.set_parent(id, hit.id, true)
+
+	local list = self.stuck[hit.id] or {}
+	self.stuck[hit.id] = list
+	table.insert(list, id)
+	if #list > MAX_ON_GEAR then
+		go.delete(table.remove(list, 1))
+	end
+end
+
+function update(self, dt)
+	for i = #self.drops, 1, -1 do
+		local d = self.drops[i]
+		d.v = d.v + GRAVITY * dt
+		local next_p = d.p + d.v * dt
+
+		local hit = physics.raycast(d.p, next_p, GROUPS)
+		if hit then
+			print("splatter: kropla trafiła w", hit.id)
+			make_splat(self, hit)
+			table.remove(self.drops, i)
+		else
+			d.p = next_p
+			d.life = d.life - dt
+			if d.life <= 0 then
+				table.remove(self.drops, i)
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("burst") then
+		print("splatter: kot zginął w miejscu", message.pos)
+		burst(self, message.pos, 80)
+	end
+end

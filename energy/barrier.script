@@ -1,0 +1,56 @@
+-- Bariera energii: jedzie w prawo, pulsuje, po trafieniu odskakuje
+local SPEED = 180          -- wolniej niz gracz (230)
+local PUSH_BACK = 430    -- odskok w lewo po trafieniu
+local PLAYER = "/player"   -- id gracza w kolekcji
+local GLOW_COLOR = vmath.vector4(0.1, 0.5, 1.0, 0.6)  -- poswiata
+local CORE_COLOR = vmath.vector4(0.8, 1.0, 1.0, 1.0)  -- rdzen
+
+function init(self)
+	self.time = 0
+	particlefx.play("#sparks")
+	-- local pos_player = go.get_position(PLAYER)
+	-- pos_player.y = 0
+	-- pos_player.x = pos_player.x - 200 
+	-- go.set_position(pos_player)
+
+	go.set(".", "position.x", go.get_position(PLAYER).x - 200)
+	
+	go.set("glow#sprite", "tint", GLOW_COLOR)
+	go.set("core#sprite", "tint", CORE_COLOR)
+end
+
+function update(self, dt)
+	self.time = self.time + dt
+
+	local pos = go.get_position()
+	pos.x = pos.x + SPEED * dt
+	go.set_position(pos)
+
+	-- pulsowanie poswiaty (szerokosc + jasnosc)
+	local p = 0.5 + 0.5 * math.sin(self.time * 4)
+	go.set("glow", "scale.x", 1.0 + p * 0.4)
+	go.set("glow#sprite", "tint.w", 0.4 + p * 0.3)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter then
+
+		-- if self.barrier_jump_back then
+			-- return --odskakuje plynie w tyl wyjdz z funkcji w razie kontaktuz player
+		-- end
+		-- self.barrier_jump_back = true
+
+		msg.post(message.other_id, "hit" ) -- message.other_id wyslij do obiektu ktory dotknal bariery 
+		
+		local target_x = go.get_position().x - PUSH_BACK
+		
+		go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, target_x, go.EASING_OUTCUBIC, 0.8, 0,
+		function()
+			self.barrier_jump_back = false  -- koniec odskoku, bariera znowu jedzie
+		end)
+		
+		--local pos = go.get_position()
+		--pos.x = pos.x - PUSH_BACK
+		--go.set_position(pos)
+	end
+end

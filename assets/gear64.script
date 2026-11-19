@@ -1,0 +1,28 @@
+go.property("rotate_speed", 180)              -- stopnie/s (ujemne = w druga strone)
+go.property("move", vmath.vector3(0, 0, 0))   -- przesuniecie tam i z powrotem, np. (0, 150, 0)
+--go.property("move_time", 2)                   -- sekundy w jedna strone
+
+function init(self)
+	self.reveal = 0
+	go.set("#sprite", "tint", vmath.vector4(0, 0, 0, 1))   -- start: zupelnie czarne
+
+	if self.rotate_speed ~= 0 then
+		local z = go.get(".", "euler.z")
+		local dir = self.rotate_speed > 0 and -360 or 360
+		go.animate(".", "euler.z", go.PLAYBACK_LOOP_FORWARD, z + dir, go.EASING_LINEAR, 360 / math.abs(self.rotate_speed))
+	end
+	if vmath.length(self.move) > 0 then
+		go.animate(".", "position", go.PLAYBACK_LOOP_PINGPONG, go.get_position() + self.move, go.EASING_INOUTSINE, self.move_time)
+	end
+end
+
+
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") and message.enter 
+		and message.other_group == hash("player") then	
+
+		msg.post(message.other_id, "hit" ) 
+	end
+end

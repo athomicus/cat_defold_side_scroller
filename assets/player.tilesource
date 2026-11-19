@@ -1,0 +1,16 @@
+image: "/assets/player.png"
+tile_width: 32
+tile_height: 32
+animations {
+  id: "idle"
+  start_tile: 13
+  end_tile: 20
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 15
+}
+animations {
+  id: "jump"
+  start_tile: 1
+  end_tile: 13
+  fps: 15
+}
