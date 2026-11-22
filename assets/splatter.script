@@ -1,51 +1,108 @@
-local GRAVITY = vmath.vector3(0, -900, 0)       -- krople opadają jak kot
-local GROUPS = { hash("paintable") }             -- szukamy tylko zębatek
-local BLUE = vmath.vector4(0.8, 0.0, 0.0, 1.0)   -- kolor plam
-local MAX_ON_GEAR = 25                           -- limit plam na jednej zębatce
+-- /main/splatter.script
+-- Po śmierci kota lecą krople.
+--   trafienie w zębatkę -> plama w losowym miejscu na kole
+--   trafienie w teren   -> kafel FROM_TILE zamienia się na TO_TILE
 
-function init(self)
-	self.drops = {}    -- lista lecących kropli
-	self.stuck = {}    -- plamy przyklejone do każdej zębatki
-end
+---------------------------------------------------------------
+-- USTAWIENIA
+---------------------------------------------------------------
+local GEAR_GROUP = hash("paintable")   -- Group kolizji "body" zębatki (Kinematic)
+local MAP_GROUP  = hash("terrain")     -- Group kolizji mapy
 
--- tworzy wiele kropli lecących we wszystkie strony z miejsca śmierci
-local function burst(self, pos, count)
-	for i = 1, count do
-		local angle = math.random() * math.pi * 2 --2*pi -> 360 stopni * losowy kat
-		local speed = 150 + math.random() * 300
+local TILEMAP   = "/level#dark"        -- obiekt#komponent tilemapy
+local LAYER     = "ground"             -- warstwa z kaflami do podmiany
+local TILE_SIZE = 32
+local FROM_TILE = 1
+local TO_TILE   = 3
+
+-- rozbryzg
+local DROP_COUNT = 30                  -- ile kropli przy jednej śmierci
+local SPEED_MIN  = 80                  -- najwolniejsza kropla (px/s)
+local SPEED_MAX  = 220                 -- najszybsza kropla (px/s)
+local DROP_LIFE  = 0.8                 -- ile sekund żyje kropla
+local MAX_DIST   = 150                 -- kropla dalej niż tyle px od kota znika
+local GRAVITY    = vmath.vector3(0, -900, 0)
+
+-- plamy na zębatce
+local SPLAT_COLOR   = vmath.vector4(0.8, 0.0, 0.0, 1.0)
+local GEAR_RADIUS   = 26               -- promień tarczy zębatki w px (dla 64 px ok. 26)
+local MAX_ON_GEAR   = 25               -- limit plam na jednej zębatce
+local MAX_PER_DEATH = 4                -- ile plam może dać jedna śmierć na jednej zębatce
+
+local GROUPS = { GEAR_GROUP, MAP_GROUP }
+
+---------------------------------------------------------------
+-- KROPLE
+---------------------------------------------------------------
+local function burst(self, pos)
+	self.hits_this_death = {}          -- licznik plam na zębatkach w tej śmierci
+	for i = 1, DROP_COUNT do
+		local angle = math.random() * math.pi * 2
+		local speed = SPEED_MIN + math.random() * (SPEED_MAX - SPEED_MIN)
 		table.insert(self.drops, {
-			p = vmath.vector3(pos.x, pos.y, 0), --startuje
+			start = vmath.vector3(pos.x, pos.y, 0),   -- miejsce śmierci (do liczenia zasięgu)
+			p = vmath.vector3(pos.x, pos.y, 0),
 			v = vmath.vector3(math.cos(angle) * speed, math.sin(angle) * speed, 0),
-			life = 2.0,
-		})	
+			life = DROP_LIFE,
+		})
 	end
 end
 
+---------------------------------------------------------------
+-- TRAFIENIE W ZĘBATKĘ: plama w losowym miejscu na kole
+---------------------------------------------------------------
+local function splat_gear(self, hit)
+	-- limit plam z jednej śmierci na tej zębatce
+	local count = self.hits_this_death[hit.id] or 0
+	if count >= MAX_PER_DEATH then
+		return
+	end
+	self.hits_this_death[hit.id] = count + 1
 
---one drop:
---{
---	p = vmath.vector3(412, 96, 0),     -- startuje tam, gdzie zginął kot
---	v = vmath.vector3(212, 212, 0),    -- leci w prawo i w górę, 300 px/s
---	life = 2.0,                        -- zniknie po 2 sekundach
---}
+	-- losowe miejsce na tarczy: losowy kąt i odległość od środka
+	local center = go.get_world_position(hit.id)
+	local a = math.random() * math.pi * 2
+	local r = GEAR_RADIUS * (0.3 + math.random() * 0.7)
+	local pos = vmath.vector3(center.x + math.cos(a) * r, center.y + math.sin(a) * r, 0.1)
 
-
--- tworzy niebieską plamę i przykleja ją do zębatki
-local function make_splat(self, hit)
-	local pos = vmath.vector3(hit.position.x, hit.position.y, 0.1)
-	local rot = vmath.quat_rotation_z(math.random() * math.pi * 2)
+	local rot   = vmath.quat_rotation_z(math.random() * math.pi * 2)
 	local scale = 0.15 + math.random() * 0.2
 
 	local id = factory.create("#splat_factory", pos, rot, nil, scale)
-	go.set(msg.url(nil, id, "sprite"), "tint", BLUE)
-	go.set_parent(id, hit.id, true)
+	go.set(msg.url(nil, id, "sprite"), "tint", SPLAT_COLOR)
+	go.set_parent(id, hit.id, true)    -- plama kręci się razem z zębatką
 
+	-- limit plam na zębatce w ogóle
 	local list = self.stuck[hit.id] or {}
 	self.stuck[hit.id] = list
 	table.insert(list, id)
 	if #list > MAX_ON_GEAR then
 		go.delete(table.remove(list, 1))
 	end
+end
+
+---------------------------------------------------------------
+-- TRAFIENIE W TEREN: podmiana kafla
+---------------------------------------------------------------
+local function paint_tile(hit)
+	local p = hit.position - hit.normal * 2
+	local origin = go.get_world_position(hit.id)
+
+	local tx = math.floor((p.x - origin.x) / TILE_SIZE) + 1
+	local ty = math.floor((p.y - origin.y) / TILE_SIZE) + 1
+
+	if tilemap.get_tile(TILEMAP, LAYER, tx, ty) == FROM_TILE then
+		tilemap.set_tile(TILEMAP, LAYER, tx, ty, TO_TILE)
+	end
+end
+
+---------------------------------------------------------------
+-- DEFOLD
+---------------------------------------------------------------
+function init(self)
+	self.drops = {}
+	self.stuck = {}
+	self.hits_this_death = {}
 end
 
 function update(self, dt)
@@ -55,14 +112,19 @@ function update(self, dt)
 		local next_p = d.p + d.v * dt
 
 		local hit = physics.raycast(d.p, next_p, GROUPS)
+
 		if hit then
-			print("splatter: kropla trafiła w", hit.id)
-			make_splat(self, hit)
+			if hit.group == GEAR_GROUP then
+				splat_gear(self, hit)
+			else
+				paint_tile(hit)
+			end
 			table.remove(self.drops, i)
 		else
 			d.p = next_p
 			d.life = d.life - dt
-			if d.life <= 0 then
+			-- znika, gdy skończy się czas albo odleci za daleko od kota
+			if d.life <= 0 or vmath.length(d.p - d.start) > MAX_DIST then
 				table.remove(self.drops, i)
 			end
 		end
@@ -71,7 +133,6 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("burst") then
-		print("splatter: kot zginął w miejscu", message.pos)
-		burst(self, message.pos, 80)
+		burst(self, message.pos)
 	end
 end

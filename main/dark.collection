@@ -20,7 +20,7 @@ instances {
   prototype: "/assets/gear64.go"
   position {
     x: 58.0
-    y: 327.0
+    y: 298.0
   }
 }
 instances {
@@ -51,8 +51,8 @@ instances {
   id: "gear4"
   prototype: "/assets/gear64.go"
   position {
-    x: 311.0
-    y: 310.0
+    x: 312.0
+    y: 319.0
   }
 }
 instances {
@@ -87,6 +87,86 @@ instances {
     y: 394.0
   }
 }
+instances {
+  id: "gear8"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 933.0
+    y: 335.0
+  }
+}
+instances {
+  id: "gear9"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 919.0
+    y: 216.0
+  }
+}
+instances {
+  id: "gear10"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 304.0
+    y: 426.0
+  }
+}
+instances {
+  id: "gear11"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 480.0
+    y: 467.0
+  }
+}
+instances {
+  id: "gear12"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 365.0
+    y: 117.0
+  }
+}
+instances {
+  id: "gear13"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 231.0
+    y: 276.0
+  }
+}
+instances {
+  id: "gear14"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 562.0
+    y: 336.0
+  }
+}
+instances {
+  id: "gear15"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 400.0
+    y: 289.0
+  }
+}
+instances {
+  id: "gear16"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 683.0
+    y: 457.0
+  }
+}
+instances {
+  id: "gear17"
+  prototype: "/assets/gear64.go"
+  position {
+    x: 480.0
+    y: 151.0
+  }
+}
 scale_along_z: 0
 embedded_instances {
   id: "hud"
@@ -110,7 +190,7 @@ embedded_instances {
   "mass: 0.0\\n"
   "friction: 0.1\\n"
   "restitution: 0.5\\n"
-  "group: \\\"terrain,obstacles\\\"\\n"
+  "group: \\\"terrain\\\"\\n"
   "mask: \\\"player\\\"\\n"
   "\"\n"
   "}\n"
@@ -154,6 +234,14 @@ embedded_instances {
   id: "gears"
   children: "gear"
   children: "gear1"
+  children: "gear10"
+  children: "gear11"
+  children: "gear12"
+  children: "gear13"
+  children: "gear14"
+  children: "gear15"
+  children: "gear16"
+  children: "gear17"
   children: "gear2"
   children: "gear3"
   children: "gear4"
@@ -162,6 +250,8 @@ embedded_instances {
   children: "gear64"
   children: "gear641"
   children: "gear7"
+  children: "gear8"
+  children: "gear9"
   data: ""
 }
 embedded_instances {
