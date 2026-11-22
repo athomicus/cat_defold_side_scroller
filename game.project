@@ -1,5 +1,5 @@
 [bootstrap]
-main_collection = /main/dark.collectionc
+main_collection = /main/loader.collectionc
 
 [script]
 shared_state = 1
@@ -23,4 +23,7 @@ scale_mode = stretch
 [project]
 title = cavern
 dependencies#0 = https://github.com/defold/extension-teal/archive/refs/tags/v1.6.zip
+
+[sprite]
+max_count = 1024
 

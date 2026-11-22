@@ -1,0 +1,31 @@
+local game_state = require("main.game_state")
+local LEVELS = { "#level1", "#level2" }   -- id komponentów proxy, po kolei
+
+function init(self)
+	print("ADRES LOADERA:", msg.url())
+	msg.post(".", "acquire_input_focus")   -- klawisze muszą przejść przez ładowarkę
+	self.index = 1
+	self.loading = false
+	msg.post(LEVELS[self.index], "async_load")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("proxy_loaded") then
+		msg.post(sender, "enable")         -- plansza wczytana: uruchom ją
+		self.loading = false
+
+	elseif message_id == hash("next_level") then
+		if self.loading then return end    -- ignoruj podwójne dotknięcie
+		self.loading = true
+		msg.post(LEVELS[self.index], "unload")
+
+	elseif message_id == hash("proxy_unloaded") then
+		
+		self.index = self.index % #LEVELS + 1   -- następna plansza (po ostatniej wraca do 1)
+		msg.post(LEVELS[self.index], "async_load")
+		if self.index == 1 then
+			game_state.deaths = 0          -- powrót do pierwszej planszy = nowa gra
+		end
+		
+	end
+end

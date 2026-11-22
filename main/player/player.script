@@ -1,4 +1,5 @@
 -- ctr +  alt  + i 
+local game_state = require("main.game_state")
 local LEFT = hash("left")
 local RIGHT = hash("right")
 local UP = hash("up")
@@ -19,7 +20,8 @@ local play_animation --Func
 
 function init(self)
 	self.forced_run = 0
-	self.deaths = 0
+	msg.post("/hud#hud", "set_deaths", { deaths_count = game_state.deaths })
+	--self.deaths = 0
 	--print("init_started")
 	self.correction = vmath.vector3()
 	self.left = false
@@ -34,6 +36,7 @@ function init(self)
 end
 
 function update(self, dt)
+	print("kot:", go.get_position())
 	if not self.active then
 		return
 	end
@@ -110,9 +113,9 @@ function on_message(self, message_id, message, sender)
 		-- puchniecie sprite'a i powrot
 		go.animate("#sprite", "scale", go.PLAYBACK_ONCE_PINGPONG,vmath.vector3(1.6, 1.6, 1), go.EASING_OUTQUAD, 0.2)
 
-		self.deaths = self.deaths + 1
-		msg.post("/hud#hud", "set_deaths", { deaths_count= self.deaths })
-
+		game_state.deaths = game_state.deaths + 1
+		msg.post("/hud#hud", "set_deaths", { deaths_count = game_state.deaths })
+		
 		--powinno dzialac tylko dla bariery przesuniecie kota w prawo
 		if sender.path == hash("/barrier") then
 			self.forced_run = FORCED_RUN_TIME
