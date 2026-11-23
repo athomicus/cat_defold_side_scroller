@@ -1,4 +1,7 @@
 images {
   image: "/assets/tree.png"
 }
+images {
+  image: "/assets/logo1.png"
+}
 extrude_borders: 2
