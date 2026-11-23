@@ -16,7 +16,7 @@ local FROM_TILE = 1
 local TO_TILE   = 3
 
 -- rozbryzg
-local DROP_COUNT = 30                  -- ile kropli przy jednej śmierci
+local DROP_COUNT = 40                  -- ile kropli przy jednej śmierci
 local SPEED_MIN  = 80                  -- najwolniejsza kropla (px/s)
 local SPEED_MAX  = 220                 -- najszybsza kropla (px/s)
 local DROP_LIFE  = 0.8                 -- ile sekund żyje kropla
@@ -26,8 +26,8 @@ local GRAVITY    = vmath.vector3(0, -900, 0)
 -- plamy na zębatce
 local SPLAT_COLOR   = vmath.vector4(0.8, 0.0, 0.0, 1.0)
 local GEAR_RADIUS   = 26               -- promień tarczy zębatki w px (dla 64 px ok. 26)
-local MAX_ON_GEAR   = 25               -- limit plam na jednej zębatce
-local MAX_PER_DEATH = 4                -- ile plam może dać jedna śmierć na jednej zębatce
+local MAX_ON_GEAR   = 30               -- limit plam na jednej zębatce
+local MAX_PER_DEATH = 10                -- ile plam może dać jedna śmierć na jednej zębatce
 
 local GROUPS = { GEAR_GROUP, MAP_GROUP }
 
@@ -83,7 +83,7 @@ end
 
 ---------------------------------------------------------------
 -- TRAFIENIE W TEREN: podmiana kafla
----------------------------------------------------------------
+------------------------------------------ -------------
 local function paint_tile(hit)
 	local p = hit.position - hit.normal * 2
 	local origin = go.get_world_position(hit.id)
@@ -96,9 +96,6 @@ local function paint_tile(hit)
 	end
 end
 
----------------------------------------------------------------
--- DEFOLD
----------------------------------------------------------------
 function init(self)
 	self.drops = {}
 	self.stuck = {}

@@ -3,8 +3,9 @@ instances {
   id: "player"
   prototype: "/main/player/player.go"
   position {
-    x: 41.0
-    y: 65.0
+    x: 50.0
+    y: 52.0
+    z: 0.1
   }
 }
 instances {
@@ -20,7 +21,7 @@ instances {
   prototype: "/assets/gear64.go"
   position {
     x: 58.0
-    y: 298.0
+    y: 289.0
   }
 }
 instances {
@@ -43,8 +44,8 @@ instances {
   id: "gear3"
   prototype: "/assets/gear64.go"
   position {
-    x: 492.0
-    y: 228.0
+    x: 555.0
+    y: 213.0
   }
 }
 instances {
@@ -67,8 +68,8 @@ instances {
   id: "gear6"
   prototype: "/assets/gear64.go"
   position {
-    x: 729.0
-    y: 220.0
+    x: 753.0
+    y: 213.0
   }
 }
 instances {
@@ -115,7 +116,7 @@ instances {
   id: "gear11"
   prototype: "/assets/gear64.go"
   position {
-    x: 480.0
+    x: 564.0
     y: 467.0
   }
 }
@@ -131,15 +132,15 @@ instances {
   id: "gear13"
   prototype: "/assets/gear64.go"
   position {
-    x: 231.0
-    y: 276.0
+    x: 221.0
+    y: 283.0
   }
 }
 instances {
   id: "gear14"
   prototype: "/assets/gear64.go"
   position {
-    x: 562.0
+    x: 551.0
     y: 336.0
   }
 }
@@ -149,22 +150,6 @@ instances {
   position {
     x: 400.0
     y: 289.0
-  }
-}
-instances {
-  id: "gear16"
-  prototype: "/assets/gear64.go"
-  position {
-    x: 683.0
-    y: 457.0
-  }
-}
-instances {
-  id: "gear17"
-  prototype: "/assets/gear64.go"
-  position {
-    x: 480.0
-    y: 151.0
   }
 }
 scale_along_z: 0
@@ -240,8 +225,6 @@ embedded_instances {
   children: "gear13"
   children: "gear14"
   children: "gear15"
-  children: "gear16"
-  children: "gear17"
   children: "gear2"
   children: "gear3"
   children: "gear4"
@@ -290,5 +273,46 @@ embedded_instances {
   position {
     x: 870.0
     y: 437.0
+  }
+}
+embedded_instances {
+  id: "save_position"
+  data: "components {\n"
+  "  id: \"checkpoint\"\n"
+  "  component: \"/main/checkpoint.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_TRIGGER\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"save_pos\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_BOX\\n"
+  "    position {\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 3\\n"
+  "  }\\n"
+  "  data: 15.824752\\n"
+  "  data: 15.761092\\n"
+  "  data: 10.0\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 688.0
+    y: 241.0
+  }
+  scale3 {
+    x: 3.056216
+    y: 2.067661
   }
 }

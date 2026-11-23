@@ -513,6 +513,11 @@ layers {
     rotate90: 1
   }
   cell {
+    x: 21
+    y: 7
+    tile: 149
+  }
+  cell {
     x: 24
     y: 7
     tile: 0

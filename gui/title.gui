@@ -1,3 +1,4 @@
+script: "/gui/title_gui.gui_script"
 textures {
   name: "tree"
   texture: "/assets/tree.atlas"

@@ -10,6 +10,7 @@ embedded_components {
   "friction: 0.1\n"
   "restitution: 0.5\n"
   "group: \"player\"\n"
+  "mask: \"save_pos\"\n"
   "mask: \"exit\"\n"
   "mask: \"energy\"\n"
   "mask: \"terrain\"\n"
